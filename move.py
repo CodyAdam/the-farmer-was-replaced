@@ -1,5 +1,6 @@
-import utils
 from builtins import *
+import utils
+
 
 def goto(pos, wrapping = True):
 	#quick_print(pos)

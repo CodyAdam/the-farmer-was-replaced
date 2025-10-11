@@ -1,3 +1,5 @@
+from builtins import *
+
 def max_dict(d):
 	max_val = None
 	max_key = None

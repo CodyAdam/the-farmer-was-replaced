@@ -1,4 +1,5 @@
 import utils
+from builtins import *
 import unlock 
 
 data = {
