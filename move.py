@@ -38,7 +38,11 @@ def get_next():
 		x += 1
 	y += 1
 	return (x,y)
-	
+
+def get_next_line():
+	x, y = get_pos_x(), get_pos_y()
+	size = get_world_size()
+	return ((x + 1) % size, y)
 	
 dino_cycle_alt = False
 def get_next_dino():

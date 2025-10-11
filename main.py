@@ -9,7 +9,7 @@ while True:
 	# harvest.do_treasure()
 	# continue
 	mode = state.get_mode()
-	mode = "wood"
+	mode = "cactus"
 	
 	if mode == "weird":
 		harvest.do_grass_weird()

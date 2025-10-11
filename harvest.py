@@ -184,6 +184,7 @@ def do_cactus():
 		state.incr_turn(get_world_size() ** 2)
 		move.goto(move.get_next())
 
+
 def do_dino():
 	size = get_world_size()
 	x, y = get_pos_x(), get_pos_y()
