@@ -86,3 +86,5 @@ def get_next_dino():
 		y -= 1
 	return utils.clamp_pos((x,y))
 	
+def move_direction(direction):
+	return move(direction)

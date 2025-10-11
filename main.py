@@ -6,12 +6,15 @@ change_hat(Hats.Straw_Hat)
 move.goto((0,0))
 
 while True:
+	# harvest.do_treasure()
+	# continue
 	mode = state.get_mode()
+	mode = "wood"
 	
 	if mode == "weird":
 		harvest.do_grass_weird()
 	elif mode == "hay" or mode == "wood" or mode == "carrot":
-		harvest.do_poly()
+		harvest.do_poly_multi()
 	elif mode == "wood":
 		x, y = get_pos_x(), get_pos_y()
 		if (x + y) % 2 == 0:

@@ -13,6 +13,7 @@ data = {
 	"companion": dict(),
 	"maze_dir_index": 0,
 	"maze_seen": set(),
+	"poly_drones": [],
 }
 
 def clear_state(mode = None):
@@ -29,6 +30,7 @@ def clear_state(mode = None):
 		"companion": dict(),
 		"maze_dir_index": 0,
 		"maze_seen": set(),
+		"poly_drones": [],
 	}
 
 def incr_turn(val = 1):
@@ -43,6 +45,7 @@ def set_data(new_data):
 
 def spawn_with_data(action, custom_data):
 	def init_data_and_run():
+		change_hat(Hats.Wizard_Hat)
 		action(custom_data, True)
 	return spawn_drone(init_data_and_run)
 	
@@ -83,5 +86,6 @@ def get_mode():
 			change_hat(Hats.Straw_Hat)
 			
 		clear_state(new_mode)
+		clear()
 		
 	return new_mode

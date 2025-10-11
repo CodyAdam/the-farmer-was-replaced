@@ -187,18 +187,9 @@ def do_cactus():
 def do_dino():
 	size = get_world_size()
 	x, y = get_pos_x(), get_pos_y()
-
-	# clear field
-	change_hat(Hats.Straw_Hat)
-	for _ in range(size ** 2):
-		if can_harvest():
-			harvest()
-		move.goto(move.get_next())
-				
-
+	clear()
 	move.goto((0,0))
 	change_hat(Hats.Dinosaur_Hat)
-
 	
 	while move.goto(move.get_next_dino(), False):
 		if get_entity_type() != Entities.Apple and can_harvest():
@@ -206,7 +197,7 @@ def do_dino():
 	change_hat(Hats.Dinosaur_Hat)
 	state.incr_turn(size ** 2)
 	
-def do_treasure(data = state.data, is_clone = False):
+def do_treasure(data = state.data, is_clone = False):	
 	while get_entity_type() == Entities.Hedge:	
 		x, y = get_pos_x(), get_pos_y()
 		dirs = [(x,y+1), (x+1,y), (x,y-1), (x-1,y)]
@@ -239,11 +230,12 @@ def do_treasure(data = state.data, is_clone = False):
 	
 	if can_harvest():
 		harvest()
+	clear()
+	state.data["maze_seen"] = set()
 	plant(Entities.Bush)
 	n_substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
 	use_item(Items.Weird_Substance, n_substance)
 	state.incr_turn(get_world_size() ** 2)
-	state.clear_state()
 		
 	
 def do_poly():
@@ -254,8 +246,8 @@ def do_poly():
 		p = comp[(x, y)]	
 		
 	if p == None:
-		r = random() * 4 // 1
-		p = [Entities.Bush, Entities.Grass, Entities.Carrot, Entities.Tree][r]
+		r = random() * 3 // 1
+		p = [Entities.Grass, Entities.Carrot, Entities.Tree][r]
 		
 	if can_harvest():
 		harvest()
@@ -279,4 +271,81 @@ def do_poly():
 	if companion_plant:
 		comp[(cx,cy)] = companion_plant
 	move.goto(move.get_next())
+
+def process_line_poly(data, is_clone = False):
+	comp = data["companion"]
+	size = get_world_size()
+	line_y = get_pos_y()
+	
+	for x in range(size):
+		move.goto((x, line_y))
+		pos = (x, line_y)
+		
+		p = None
+		if pos in comp:
+			p = comp[pos]
+		
+		if p == None:
+			r = random() * 4 // 1
+			p = [Entities.Bush, Entities.Grass, Entities.Carrot, Entities.Tree][r]
+			
+		
+		if can_harvest():
+			harvest()
+		
+		if p == Entities.Bush:
+			water()
+			plant(Entities.Bush)
+		elif p == Entities.Grass:
+			if get_ground_type() == Grounds.Soil:
+				till()
+		elif p == Entities.Carrot:
+			water()
+			if get_ground_type() != Grounds.Soil:
+				till()
+			plant(Entities.Carrot)
+		elif p == Entities.Tree:
+			water()
+			plant(Entities.Tree)
+		
+		companion_result = get_companion()
+		if companion_result != None:
+			companion_plant, (cx, cy) = companion_result
+			if companion_plant:
+				comp[(cx, cy)] = companion_plant
+	
+	return comp
+
+def do_poly_multi():
+	size = get_world_size()
+	drones = state.data["poly_drones"]
+	
+	x = get_pos_x()
+	y = get_pos_y()
+	
+	if x != 0:
+		move.goto((0, y))
+	
+	i = 0
+	while i < len(drones):
+		drone_handle = drones[i]
+		if has_finished(drone_handle):
+			line_comp = wait_for(drone_handle)
+			if line_comp:
+				for pos in line_comp:
+					state.data["companion"][pos] = line_comp[pos]
+			drones.pop(i)
+		else:
+			i += 1
+	
+	line_data = {
+		"companion": dict(state.data["companion"])
+	}
+		
+	new_drone = state.spawn_with_data(process_line_poly, line_data)
+	if new_drone != None:
+		drones.append(new_drone)
+		move.move_direction(North)
+		state.incr_turn(size)
+	state.data["poly_drones"] = drones
 
