@@ -43,6 +43,57 @@ def get_next_line():
 	x, y = get_pos_x(), get_pos_y()
 	size = get_world_size()
 	return ((x + 1) % size, y)
+
+def get_ordered_direction_to(pos):
+	# get the direction array like [North, East, South, West], but sorted so that the first direction is the one that is closest to the target
+	target_x, target_y = pos
+	x, y = get_pos_x(), get_pos_y()
+	dx = target_x - x
+	dy = target_y - y
+
+	directions = [North, East, South, West]
+
+	def score_direction(direction):
+		# returns a value (lower is closer to target)
+		if direction == North:
+			return abs(dx) + abs(dy-1)
+		elif direction == South:
+			return abs(dx) + abs(dy+1)
+		elif direction == East:
+			return abs(dx-1) + abs(dy)
+		elif direction == West:
+			return abs(dx+1) + abs(dy)
+		return abs(dx) + abs(dy)
+
+	scored_dirs = []
+	for direction in directions:
+		scored_dirs.append((score_direction(direction), direction))
+
+	# manual selection sort (since sort is not allowed)
+	n = len(scored_dirs)
+	for i in range(n):
+		min_idx = i
+		for j in range(i + 1, n):
+			if scored_dirs[j][0] < scored_dirs[min_idx][0]:
+				min_idx = j
+		# Swap the found minimum element with the first element
+		scored_dirs[i], scored_dirs[min_idx] = scored_dirs[min_idx], scored_dirs[i]
+
+	ordered = []
+	for pair in scored_dirs:
+		ordered.append(pair[1])
+	return ordered
+
+def get_pos_from_direction(direction):
+	x, y = get_pos_x(), get_pos_y()
+	offsets = {
+		North: (0, 1),
+		South: (0, -1),
+		East: (1, 0),
+		West: (-1, 0)
+	}
+	dx, dy = offsets[direction]
+	return (x + dx, y + dy)
 	
 dino_cycle_alt = False
 def get_next_dino():

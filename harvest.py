@@ -5,7 +5,7 @@ import utils
 
 
 def water():
-	if get_water() < 0.8 and num_items(Items.Water) > 0:
+	if get_water() < 0.8 and num_items(Items.Water) > 100:
 		use_item(Items.Water)
 	
 
@@ -187,7 +187,6 @@ def do_cactus():
 
 def do_dino():
 	size = get_world_size()
-	x, y = get_pos_x(), get_pos_y()
 	clear()
 	move.goto((0,0))
 	change_hat(Hats.Dinosaur_Hat)
@@ -198,17 +197,29 @@ def do_dino():
 	change_hat(Hats.Dinosaur_Hat)
 	state.incr_turn(size ** 2)
 	
-def do_treasure(data = state.data, is_clone = False):	
+def do_treasure(data = state.data, is_clone = False):
 	while get_entity_type() == Entities.Hedge:	
+		if data["maze_target"] != measure():
+			if is_clone:
+				return
+			data["maze_target"] = measure()
+			data["maze_seen"] = set()
+			data["maze_run"] += 1
+		if num_drones() == 1 and not is_clone:
+			quick_print("unstuck")
+			data["maze_seen"] = set()
+			
 		x, y = get_pos_x(), get_pos_y()
-		dirs = [(x,y+1), (x+1,y), (x,y-1), (x-1,y)]
-		move.goto(dirs[data["maze_dir_index"]])
+		if data["maze_next_pos"] != None:
+			move.goto(data["maze_next_pos"])
 		if not get_entity_type() == Entities.Hedge:
 			break
+		dirs_face = move.get_ordered_direction_to(data["maze_target"])
+		dirs = []
+		for direction in dirs_face:
+			dirs.append(move.get_pos_from_direction(direction))
 		x, y = get_pos_x(), get_pos_y()
 		data["maze_seen"].add((x, y))
-		dirs = [(x,y+1), (x+1,y), (x,y-1), (x-1,y)]
-		dirs_face = [North, East, South, West]
 		index_to_move = []
 		for i in range(4):
 			if dirs[i] in data["maze_seen"]:
@@ -221,22 +232,44 @@ def do_treasure(data = state.data, is_clone = False):
 			else:
 				continue
 		for i in index_to_move:
+			new_pos = dirs[i]
 			if index_to_move[0] == i:
-				data["maze_dir_index"] = i
+				data["maze_next_pos"] = new_pos
+			elif num_drones() >= max_drones():
+				break
 			else:
 				clone_data = dict(data)
-				clone_data["maze_dir_index"] = i
-				if not state.spawn_with_data(do_treasure, clone_data):
-					print("can't spawn")
+				clone_data["maze_next_pos"] = new_pos
+				state.spawn_with_data(do_treasure, clone_data)
 	
-	if can_harvest():
-		harvest()
-	clear()
-	state.data["maze_seen"] = set()
-	plant(Entities.Bush)
-	n_substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
-	use_item(Items.Weird_Substance, n_substance)
-	state.incr_turn(get_world_size() ** 2)
+	def new_maze():
+		if get_entity_type() != Entities.Treasure:
+			plant(Entities.Bush)
+		n_substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
+		use_item(Items.Weird_Substance, n_substance)
+		return measure()
+		
+	if can_harvest() and get_entity_type() == Entities.Treasure:
+		data["maze_seen"] = set()
+		if data["maze_run"] == 299:
+			harvest()
+		data["maze_target"] = new_maze()
+		data["maze_run"] += 1
+		quick_print("maze_run", data["maze_run"])
+		state.incr_turn(get_world_size() ** 2)
+		if is_clone:
+			state.spawn_with_data(do_treasure, dict(data))
+	else:
+		# init
+		if not is_clone:
+			data["maze_run"] = 0
+			data["maze_seen"] = set()
+			data["maze_target"] = new_maze()
+	
+	state.data = data
+
+	
+
 		
 	
 def do_poly():
@@ -273,10 +306,16 @@ def do_poly():
 		comp[(cx,cy)] = companion_plant
 	move.goto(move.get_next())
 
-def process_line_poly(data, is_clone = False):
+def process_line_poly(data, is_clone=False):
 	comp = data["companion"]
 	size = get_world_size()
 	line_y = get_pos_y()
+	
+	# Get fallback from data dictionary directly, default to None if key missing
+	if "fallback" in data:
+		fallback = data["fallback"]
+	else:
+		fallback = None
 	
 	for x in range(size):
 		move.goto((x, line_y))
@@ -287,9 +326,13 @@ def process_line_poly(data, is_clone = False):
 			p = comp[pos]
 		
 		if p == None:
-			r = random() * 4 // 1
-			p = [Entities.Bush, Entities.Grass, Entities.Carrot, Entities.Tree][r]
-			
+			if fallback != None:
+				p = fallback
+			else:
+				# Default fallback random:
+				entities_list = [Entities.Bush, Entities.Grass, Entities.Carrot, Entities.Tree]
+				r = int(random() * len(entities_list))
+				p = entities_list[r]
 		
 		if can_harvest():
 			harvest()
@@ -317,7 +360,7 @@ def process_line_poly(data, is_clone = False):
 	
 	return comp
 
-def do_poly_multi():
+def do_poly_multi(fallback=None):
 	size = get_world_size()
 	drones = state.data["poly_drones"]
 	
@@ -342,8 +385,13 @@ def do_poly_multi():
 	line_data = {
 		"companion": dict(state.data["companion"])
 	}
-		
-	new_drone = state.spawn_with_data(process_line_poly, line_data)
+	if fallback != None:
+		line_data["fallback"] = fallback
+
+	new_drone = state.spawn_with_data(
+		process_line_poly,
+		line_data
+	)
 	if new_drone != None:
 		drones.append(new_drone)
 		move.move_direction(North)
