@@ -20,6 +20,12 @@ def min_dict(d):
 			min_key = key
 	return min_key, min_val
 
+def random_direction():
+	dirs = [North, East, South, West]
+	index = random() * len(dirs) // 1
+	return dirs[index]
+
+
 def clamp_pos(pos):
 	x, y = pos
 	size = get_world_size()
@@ -27,3 +33,10 @@ def clamp_pos(pos):
 	clamp_y = max(min(size-1, y), 0)
 	return (clamp_x, clamp_y)
 	
+def sign(num):
+	if num > 0:
+		return 1
+	elif num < 0:
+		return -1
+	else:
+		return 0

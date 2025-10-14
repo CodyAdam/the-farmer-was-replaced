@@ -44,45 +44,31 @@ def get_next_line():
 	size = get_world_size()
 	return ((x + 1) % size, y)
 
+
 def get_ordered_direction_to(pos):
-	# get the direction array like [North, East, South, West], but sorted so that the first direction is the one that is closest to the target
+	# Returns [North, East, South, West] prioritized according to dx/dy sign using a dict
 	target_x, target_y = pos
 	x, y = get_pos_x(), get_pos_y()
 	dx = target_x - x
 	dy = target_y - y
 
-	directions = [North, East, South, West]
+	sdx = utils.sign(dx)
+	sdy = utils.sign(dy)
 
-	def score_direction(direction):
-		# returns a value (lower is closer to target)
-		if direction == North:
-			return abs(dx) + abs(dy-1)
-		elif direction == South:
-			return abs(dx) + abs(dy+1)
-		elif direction == East:
-			return abs(dx-1) + abs(dy)
-		elif direction == West:
-			return abs(dx+1) + abs(dy)
-		return abs(dx) + abs(dy)
+	dir_map = {
+		(0, 0):   [North, East, South, West],      # Already there, arbitrary
+		(1, 0):   [East, North, South, West],      # Go East first
+		(-1, 0):  [West, North, South, East],      # Go West first
+		(0, 1):   [North, East, West, South],      # Go North first
+		(0, -1):  [South, East, West, North],      # Go South first
+		(1, 1):   [North, East, West, South],      # Prefer North then East
+		(1, -1):  [South, East, North, West],      # Prefer South then East
+		(-1, 1):  [North, West, East, South],      # Prefer North then West
+		(-1, -1): [South, West, North, East],      # Prefer South then West 
+	}
 
-	scored_dirs = []
-	for direction in directions:
-		scored_dirs.append((score_direction(direction), direction))
-
-	# manual selection sort (since sort is not allowed)
-	n = len(scored_dirs)
-	for i in range(n):
-		min_idx = i
-		for j in range(i + 1, n):
-			if scored_dirs[j][0] < scored_dirs[min_idx][0]:
-				min_idx = j
-		# Swap the found minimum element with the first element
-		scored_dirs[i], scored_dirs[min_idx] = scored_dirs[min_idx], scored_dirs[i]
-
-	ordered = []
-	for pair in scored_dirs:
-		ordered.append(pair[1])
-	return ordered
+	# Fallback if not found (should not hit)
+	return dir_map[(sdx, sdy)]
 
 def get_pos_from_direction(direction):
 	x, y = get_pos_x(), get_pos_y()

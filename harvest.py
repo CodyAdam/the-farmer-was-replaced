@@ -188,7 +188,6 @@ def do_cactus():
 def do_dino():
 	size = get_world_size()
 	clear()
-	move.goto((0,0))
 	change_hat(Hats.Dinosaur_Hat)
 	
 	while move.goto(move.get_next_dino(), False):
@@ -196,22 +195,21 @@ def do_dino():
 			harvest()
 	change_hat(Hats.Dinosaur_Hat)
 	state.incr_turn(size ** 2)
-	
+
+MAZE_MAX_DRONES = 10
 def do_treasure(data = state.data, is_clone = False):
 	while get_entity_type() == Entities.Hedge:	
+		x, y = get_pos_x(), get_pos_y()
 		if data["maze_target"] != measure():
-			if is_clone:
-				return
 			data["maze_target"] = measure()
 			data["maze_seen"] = set()
 			data["maze_run"] += 1
 		if num_drones() == 1 and not is_clone:
 			quick_print("unstuck")
 			data["maze_seen"] = set()
-			
-		x, y = get_pos_x(), get_pos_y()
+
 		if data["maze_next_pos"] != None:
-			move.goto(data["maze_next_pos"])
+			move.goto(data["maze_next_pos"], False)
 		if not get_entity_type() == Entities.Hedge:
 			break
 		dirs_face = move.get_ordered_direction_to(data["maze_target"])
@@ -230,12 +228,13 @@ def do_treasure(data = state.data, is_clone = False):
 			if is_clone:
 				return
 			else:
+				move.move_direction(utils.random_direction())
 				continue
 		for i in index_to_move:
 			new_pos = dirs[i]
 			if index_to_move[0] == i:
 				data["maze_next_pos"] = new_pos
-			elif num_drones() >= max_drones():
+			elif num_drones() >= MAZE_MAX_DRONES:
 				break
 			else:
 				clone_data = dict(data)
@@ -251,10 +250,10 @@ def do_treasure(data = state.data, is_clone = False):
 		
 	if can_harvest() and get_entity_type() == Entities.Treasure:
 		data["maze_seen"] = set()
-		if data["maze_run"] == 299:
-			harvest()
 		data["maze_target"] = new_maze()
 		data["maze_run"] += 1
+		if data["maze_run"] == 300:
+			harvest()
 		quick_print("maze_run", data["maze_run"])
 		state.incr_turn(get_world_size() ** 2)
 		if is_clone:
