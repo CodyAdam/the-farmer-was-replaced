@@ -1,4 +1,3 @@
-
 def try_unlock():
 	for u in Unlocks:
 		cost = get_cost(u)

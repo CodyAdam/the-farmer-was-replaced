@@ -1,5 +1,6 @@
 from builtins import *
 
+
 def max_dict(d):
 	max_val = None
 	max_key = None
@@ -9,6 +10,7 @@ def max_dict(d):
 			max_val = val
 			max_key = key
 	return max_key, max_val
+
 
 def min_dict(d):
 	min_val = None
@@ -20,6 +22,7 @@ def min_dict(d):
 			min_key = key
 	return min_key, min_val
 
+
 def random_direction():
 	dirs = [North, East, South, West]
 	index = random() * len(dirs) // 1
@@ -29,10 +32,11 @@ def random_direction():
 def clamp_pos(pos):
 	x, y = pos
 	size = get_world_size()
-	clamp_x = max(min(size-1, x), 0)
-	clamp_y = max(min(size-1, y), 0)
+	clamp_x = max(min(size - 1, x), 0)
+	clamp_y = max(min(size - 1, y), 0)
 	return (clamp_x, clamp_y)
-	
+
+
 def sign(num):
 	if num > 0:
 		return 1

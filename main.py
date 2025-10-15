@@ -1,39 +1,33 @@
 import state
-import harvest
+import harvest_single
+import harvest_multi
 import move
 
-change_hat(Hats.Straw_Hat)
-move.goto((0,0))
+clear()
 
 while True:
-	# harvest.do_treasure()
-	# continue
 	mode = state.get_mode()
-	mode = "gold"
-	
+	mode = "bone"
+
 	if mode == "weird":
-		harvest.do_grass_weird()
+		harvest_single.do_grass_weird()
 	elif mode == "hay" or mode == "wood" or mode == "carrot":
-		harvest.do_poly_multi()
+		harvest_multi.do_poly_multi()
 	elif mode == "wood":
 		x, y = get_pos_x(), get_pos_y()
 		if (x + y) % 2 == 0:
-			harvest.do_tree()
+			harvest_single.do_tree()
 		else:
-			harvest.do_grass()
+			harvest_single.do_grass()
 	elif mode == "carrot":
-		harvest.do_carrot()
+		harvest_single.do_carrot()
 	elif mode == "pumpkin":
-		harvest.do_pumpkin()
+		harvest_single.do_pumpkin()
 	elif mode == "power":
-		harvest.do_sunflower()
+		harvest_multi.do_power()
 	elif mode == "cactus":
-		harvest.do_cactus()
+		harvest_single.do_cactus()
 	elif mode == "bone":
-		harvest.do_dino()
+		harvest_single.do_dino_alt()
 	elif mode == "gold":
-		harvest.do_treasure()
-
-
-
-			
+		harvest_multi.do_treasure()
