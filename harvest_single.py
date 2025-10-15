@@ -5,460 +5,463 @@ import utils
 
 
 def water():
-    if get_water() < 0.8 and num_items(Items.Water) > 100:
-        use_item(Items.Water)
+	if get_water() < 0.8 and num_items(Items.Water) > 100:
+		use_item(Items.Water)
 
 
 def do_carrot():
-    if can_harvest():
-        harvest()
-    if get_ground_type() != Grounds.Soil:
-        till()
-    water()
-    plant(Entities.Carrot)
-    move.goto(move.get_next())
+	if can_harvest():
+		harvest()
+	if get_ground_type() != Grounds.Soil:
+		till()
+	water()
+	plant(Entities.Carrot)
+	move.goto(move.get_next())
 
 
 def do_bush():
-    water()
-    if can_harvest():
-        harvest()
-    plant(Entities.Bush)
-    move.goto(move.get_next())
+	water()
+	if can_harvest():
+		harvest()
+	plant(Entities.Bush)
+	move.goto(move.get_next())
 
 
 def do_grass():
-    if can_harvest():
-        harvest()
-    if get_ground_type() == Grounds.Soil:
-        till()
-    move.goto(move.get_next())
+	if can_harvest():
+		harvest()
+	if get_ground_type() == Grounds.Soil:
+		till()
+	move.goto(move.get_next())
 
 
 def do_grass_weird():
-    if can_harvest():
-        harvest()
+	if can_harvest():
+		harvest()
 
-    x, y = get_pos_x(), get_pos_y()
-    size = get_world_size()
+	x, y = get_pos_x(), get_pos_y()
+	size = get_world_size()
 
-    for tx in range(size):
-        for ty in range(size):
-            if (2 * tx + ty) % 5 == 0:
-                move.goto((tx, ty))
-                use_item(Items.Weird_Substance)
+	for tx in range(size):
+		for ty in range(size):
+			if (2 * tx + ty) % 5 == 0:
+				move.goto((tx, ty))
+				use_item(Items.Weird_Substance)
 
-    for _ in range(size**2):
-        if can_harvest():
-            harvest()
-        if get_ground_type() == Grounds.Soil:
-            till()
-        move.goto(move.get_next())
+	for _ in range(size**2):
+		if can_harvest():
+			harvest()
+		if get_ground_type() == Grounds.Soil:
+			till()
+		move.goto(move.get_next())
 
 
 def do_tree():
-    water()
-    if can_harvest():
-        harvest()
-    plant(Entities.Tree)
-    move.goto(move.get_next())
+	water()
+	if can_harvest():
+		harvest()
+	plant(Entities.Tree)
+	move.goto(move.get_next())
 
 
 def do_pumpkin():
-    if get_entity_type() != Entities.Pumpkin and can_harvest():
-        harvest()
-    if get_ground_type() != Grounds.Soil:
-        till()
+	if get_entity_type() != Entities.Pumpkin and can_harvest():
+		harvest()
+	if get_ground_type() != Grounds.Soil:
+		till()
 
-    iter = 0
-    while not can_harvest() or iter > 50:
-        iter += 1
-        plant(Entities.Pumpkin)
-        if num_items(Items.Fertilizer) > 1000:
-            use_item(Items.Fertilizer)
-        else:
-            break
+	iter = 0
+	while not can_harvest() or iter > 50:
+		iter += 1
+		plant(Entities.Pumpkin)
+		if num_items(Items.Fertilizer) > 1000:
+			use_item(Items.Fertilizer)
+		else:
+			break
 
-    if can_harvest():
-        if len(state.data["pumpkin"]) == get_world_size() * get_world_size():
-            size = get_world_size()
+	if can_harvest():
+		if len(state.data["pumpkin"]) == get_world_size() * get_world_size():
+			size = get_world_size()
 
-            for tx in range(size):
-                for ty in range(size):
-                    if (2 * tx + ty) % 5 == 0:
-                        move.goto((tx, ty))
-                        use_item(Items.Weird_Substance)
-            harvest()
-            state.data["pumpkin"] = set()
-        else:
-            x, y = get_pos_x(), get_pos_y()
-            if (x, y) not in state.data["pumpkin"]:
-                state.data["pumpkin"].add((x, y))
+			for tx in range(size):
+				for ty in range(size):
+					if (2 * tx + ty) % 5 == 0:
+						move.goto((tx, ty))
+						use_item(Items.Weird_Substance)
+			harvest()
+			state.data["pumpkin"] = set()
+		else:
+			x, y = get_pos_x(), get_pos_y()
+			if (x, y) not in state.data["pumpkin"]:
+				state.data["pumpkin"].add((x, y))
 
-    move.goto(move.get_next())
+	move.goto(move.get_next())
 
 
 def do_power(replant=True):
-    water()
-    if get_entity_type() != Entities.Sunflower and can_harvest():
-        harvest()
-    if get_ground_type() != Grounds.Soil:
-        till()
+	water()
+	if get_entity_type() != Entities.Sunflower and can_harvest():
+		harvest()
+	if get_ground_type() != Grounds.Soil:
+		till()
 
-    if state.data["sun_planting"]:
-        plant(Entities.Sunflower)
-        state.data["sunflower"][(get_pos_x(), get_pos_y())] = measure()
-        if len(state.data["sunflower"]) == get_world_size() * get_world_size():
-            state.data["sun_planting"] = False
-        move.goto(move.get_next())
-    else:
-        max_key, max_val = utils.max_dict(state.data["sunflower"])
-        move.goto(max_key)
-        x, y = get_pos_x(), get_pos_y()
-        if can_harvest():
-            harvest()
-            if (x, y) in state.data["sunflower"]:
-                state.data["sunflower"].pop((x, y))
-        if len(state.data["sunflower"]) < 10:
-            state.data["sun_planting"] = True
+	if state.data["sun_planting"]:
+		plant(Entities.Sunflower)
+		state.data["sunflower"][(get_pos_x(), get_pos_y())] = measure()
+		if len(state.data["sunflower"]) == get_world_size() * get_world_size():
+			state.data["sun_planting"] = False
+		move.goto(move.get_next())
+	else:
+		max_key, max_val = utils.max_dict(state.data["sunflower"])
+		move.goto(max_key)
+		x, y = get_pos_x(), get_pos_y()
+		if can_harvest():
+			harvest()
+			if (x, y) in state.data["sunflower"]:
+				state.data["sunflower"].pop((x, y))
+		if len(state.data["sunflower"]) < 10:
+			state.data["sun_planting"] = True
 
 
 def is_sorted_col(c):
-    last = -1
-    for i in range(get_world_size()):
-        current = state.data["cactus"][(c, i)]
-        if current < last:
-            return False
-        last = state.data["cactus"][(c, i)]
-    return True
+	last = -1
+	for i in range(get_world_size()):
+		current = state.data["cactus"][(c, i)]
+		if current < last:
+			return False
+		last = state.data["cactus"][(c, i)]
+	return True
 
 
 def is_sorted_line(l):
-    last = -1
-    for i in range(get_world_size()):
-        current = state.data["cactus"][(i, l)]
-        if current < last:
-            return False
-        last = state.data["cactus"][(i, l)]
-    return True
+	last = -1
+	for i in range(get_world_size()):
+		current = state.data["cactus"][(i, l)]
+		if current < last:
+			return False
+		last = state.data["cactus"][(i, l)]
+	return True
 
 
 def do_cactus():
-    if get_entity_type() != Entities.Cactus and can_harvest():
-        harvest()
-    if get_ground_type() != Grounds.Soil:
-        till()
-    x, y = get_pos_x(), get_pos_y()
+	if get_entity_type() != Entities.Cactus and can_harvest():
+		harvest()
+	if get_ground_type() != Grounds.Soil:
+		till()
+	x, y = get_pos_x(), get_pos_y()
 
-    if state.data["cactus_planting"]:
-        plant(Entities.Cactus)
-        state.data["cactus"][(x, y)] = measure()
-        if len(state.data["cactus"]) == get_world_size() * get_world_size():
-            state.data["cactus_planting"] = False
-        move.goto(move.get_next())
-    else:
-        for col in range(get_world_size()):
-            move.goto((col, 0))
-            while not is_sorted_col(col):
-                if get_pos_y() == get_world_size() - 1:
-                    move.goto((col, get_pos_y() + 1))
-                current = measure()
-                next = measure(North)
-                if current > next:
-                    swap(North)
-                    x, y = get_pos_x(), get_pos_y()
-                    state.data["cactus"][(x, y)] = next
-                    state.data["cactus"][(x, y + 1)] = current
+	if state.data["cactus_planting"]:
+		plant(Entities.Cactus)
+		state.data["cactus"][(x, y)] = measure()
+		if len(state.data["cactus"]) == get_world_size() * get_world_size():
+			state.data["cactus_planting"] = False
+		move.goto(move.get_next())
+	else:
+		for col in range(get_world_size()):
+			move.goto((col, 0))
+			while not is_sorted_col(col):
+				if get_pos_y() == get_world_size() - 1:
+					move.goto((col, get_pos_y() + 1))
+				current = measure()
+				next = measure(North)
+				if current > next:
+					swap(North)
+					x, y = get_pos_x(), get_pos_y()
+					state.data["cactus"][(x, y)] = next
+					state.data["cactus"][(x, y + 1)] = current
 
-                move.goto((col, get_pos_y() + 1))
-        for line in range(get_world_size()):
-            move.goto((0, line))
-            while not is_sorted_line(line):
-                if get_pos_x() == get_world_size() - 1:
-                    move.goto((get_pos_x() + 1, line))
-                current = measure()
-                next = measure(East)
-                if current > next:
-                    swap(East)
-                    x, y = get_pos_x(), get_pos_y()
-                    state.data["cactus"][(x, y)] = next
-                    state.data["cactus"][(x + 1, y)] = current
+				move.goto((col, get_pos_y() + 1))
+		for line in range(get_world_size()):
+			move.goto((0, line))
+			while not is_sorted_line(line):
+				if get_pos_x() == get_world_size() - 1:
+					move.goto((get_pos_x() + 1, line))
+				current = measure()
+				next = measure(East)
+				if current > next:
+					swap(East)
+					x, y = get_pos_x(), get_pos_y()
+					state.data["cactus"][(x, y)] = next
+					state.data["cactus"][(x + 1, y)] = current
 
-                move.goto((get_pos_x() + 1, line))
-        harvest()
+				move.goto((get_pos_x() + 1, line))
+		harvest()
 
-        state.data["cactus"] = dict()
-        state.data["cactus_planting"] = True
-        state.incr_turn(get_world_size() ** 2)
-        move.goto(move.get_next())
+		state.data["cactus"] = dict()
+		state.data["cactus_planting"] = True
+		state.incr_turn(get_world_size() ** 2)
+		move.goto(move.get_next())
 
 
 dino_cycle_alt = False
 
 def get_next_dino():
-    global dino_cycle_alt
-    x, y = get_pos_x(), get_pos_y()
-    size = get_world_size()
-    odd = size % 2 == 1
-    is_top = y == size - 1
-    is_pre_bot = y == 1
-    is_bot = y == 0
-    is_bot_left = (x, y) == (0, 0)
-    is_even_col = x % 2 == 0
+	global dino_cycle_alt
+	x, y = get_pos_x(), get_pos_y()
+	size = get_world_size()
+	odd = size % 2 == 1
+	is_top = y == size - 1
+	is_pre_bot = y == 1
+	is_bot = y == 0
+	is_bot_left = (x, y) == (0, 0)
+	is_even_col = x % 2 == 0
 
-    if is_bot_left:
-        return (0, 1)
-    if is_bot:
-        dino_cycle_alt = not dino_cycle_alt
-        return (0, 0)
-    if odd:
-        if dino_cycle_alt:
-            if (x, y) == (size - 2, size - 1):
-                return (x + 1, y)
-            if (x, y) == (size - 1, size - 1):
-                return (x, y - 1)
-        if x == size - 2:
-            if (x + y) % 2 == 0:
-                return (x + 1, y)
-            else:
-                return (x, y - 1)
-        elif x == size - 1:
-            if (x + y) % 2 == 1:
-                return (x, y - 1)
-            else:
-                return (x - 1, y)
-    if (x, y) == (size - 1 - size % 2, 1):
-        return (x, 0)
+	if is_bot_left:
+		return (0, 1)
+	if is_bot:
+		dino_cycle_alt = not dino_cycle_alt
+		return (0, 0)
+	if odd:
+		if dino_cycle_alt:
+			if (x, y) == (size - 2, size - 1):
+				return (x + 1, y)
+			if (x, y) == (size - 1, size - 1):
+				return (x, y - 1)
+		if x == size - 2:
+			if (x + y) % 2 == 0:
+				return (x + 1, y)
+			else:
+				return (x, y - 1)
+		elif x == size - 1:
+			if (x + y) % 2 == 1:
+				return (x, y - 1)
+			else:
+				return (x - 1, y)
+	if (x, y) == (size - 1 - size % 2, 1):
+		return (x, 0)
 
-    if (is_top and is_even_col) or (is_pre_bot and not is_even_col):
-        return (x + 1, y)
+	if (is_top and is_even_col) or (is_pre_bot and not is_even_col):
+		return (x + 1, y)
 
-    if x % 2 == 0:
-        y += 1
-    else:
-        y -= 1
-    return utils.clamp_pos((x, y))
+	if x % 2 == 0:
+		y += 1
+	else:
+		y -= 1
+	return utils.clamp_pos((x, y))
 
 
 def do_dino():
-    size = get_world_size()
-    clear()
-    change_hat(Hats.Dinosaur_Hat)
+	size = get_world_size()
+	clear()
+	change_hat(Hats.Dinosaur_Hat)
 
-    while move.goto(get_next_dino(), False):
-        if get_entity_type() != Entities.Apple and can_harvest():
-            harvest()
-    change_hat(Hats.Dinosaur_Hat)
-    state.incr_turn(size**2)
+	while move.goto(get_next_dino(), False):
+		if get_entity_type() != Entities.Apple and can_harvest():
+			harvest()
+	change_hat(Hats.Dinosaur_Hat)
+	state.incr_turn(size**2)
 
 
 def create_body(pos=None, prev=None, next=None, skipped=[]):
-    if pos == None:
-        pos = (get_pos_x(), get_pos_y())
-    return {"prev": prev, "next": next, "pos": pos, "skipped": skipped}
+	if pos == None:
+		pos = (get_pos_x(), get_pos_y())
+	return {"prev": prev, "next": next, "pos": pos, "skipped": skipped}
 
 
 def generate_dino_path_mapping(size):
-    path_map = {}
-    visited = set()
-    current_pos = (0, 0)  # Start at bottom-left
-    index = 0
-    dino_cycle_alt = False
+	path_map = {}
+	path_array = []
+	visited = set()
+	current_pos = (0, 0)  # Start at bottom-left
+	index = 0
+	dino_cycle_alt = False
 
-    # Simulate the dino path algorithm to build the complete mapping
-    while len(visited) < size * size:
-        # show percentage progress
-        quick_print("Progress:", (len(visited) * 100.0) // (size * size), "%")
-        if current_pos in visited:
-            break
+	# Simulate the dino path algorithm to build the complete mapping
+	while len(visited) < size * size:
+		# show percentage progress
+		quick_print("Progress:", (len(visited) * 100.0) // (size * size), "%")
+		if current_pos in visited:
+			break
 
-        visited.add(current_pos)
-        x, y = current_pos
+		visited.add(current_pos)
+		path_array.append(current_pos)
+		x, y = current_pos
 
-        # Calculate next position using the same logic as get_next_dino
-        odd = size % 2 == 1
-        is_top = y == size - 1
-        is_pre_bot = y == 1
-        is_bot = y == 0
-        is_bot_left = (x, y) == (0, 0)
-        is_even_col = x % 2 == 0
+		# Calculate next position using the same logic as get_next_dino
+		odd = size % 2 == 1
+		is_top = y == size - 1
+		is_pre_bot = y == 1
+		is_bot = y == 0
+		is_bot_left = (x, y) == (0, 0)
+		is_even_col = x % 2 == 0
 
-        next_pos = None
+		next_pos = None
 
-        if is_bot_left:
-            next_pos = (0, 1)
-        elif is_bot:
-            dino_cycle_alt = not dino_cycle_alt
-            next_pos = (x - 1, y)
-        elif odd:
-            if dino_cycle_alt:
-                if (x, y) == (size - 2, size - 1):
-                    next_pos = (x + 1, y)
-                elif (x, y) == (size - 1, size - 1):
-                    next_pos = (x, y - 1)
-            if next_pos == None:
-                if x == size - 2:
-                    if (x + y) % 2 == 0:
-                        next_pos = (x + 1, y)
-                    else:
-                        next_pos = (x, y - 1)
-                elif x == size - 1:
-                    if (x + y) % 2 == 1:
-                        next_pos = (x, y - 1)
-                    else:
-                        next_pos = (x - 1, y)
-        elif (x, y) == (size - 1 - size % 2, 1):
-            next_pos = (x, 0)
-        elif (is_top and is_even_col) or (is_pre_bot and not is_even_col):
-            next_pos = (x + 1, y)
-        else:
-            if x % 2 == 0:
-                next_pos = (x, y + 1)
-            else:
-                next_pos = (x, y - 1)
-            next_pos = utils.clamp_pos(next_pos)
+		if is_bot_left:
+			next_pos = (0, 1)
+		elif is_bot:
+			dino_cycle_alt = not dino_cycle_alt
+			next_pos = (x - 1, y)
+		elif odd:
+			if dino_cycle_alt:
+				if (x, y) == (size - 2, size - 1):
+					next_pos = (x + 1, y)
+				elif (x, y) == (size - 1, size - 1):
+					next_pos = (x, y - 1)
+			if next_pos == None:
+				if x == size - 2:
+					if (x + y) % 2 == 0:
+						next_pos = (x + 1, y)
+					else:
+						next_pos = (x, y - 1)
+				elif x == size - 1:
+					if (x + y) % 2 == 1:
+						next_pos = (x, y - 1)
+					else:
+						next_pos = (x - 1, y)
+		elif (x, y) == (size - 1 - size % 2, 1):
+			next_pos = (x, 0)
+		elif (is_top and is_even_col) or (is_pre_bot and not is_even_col):
+			next_pos = (x + 1, y)
+		else:
+			if x % 2 == 0:
+				next_pos = (x, y + 1)
+			else:
+				next_pos = (x, y - 1)
+			next_pos = utils.clamp_pos(next_pos)
 
-        # Calculate direction from current to next position
-        if next_pos:
-            dx = next_pos[0] - x
-            dy = next_pos[1] - y
+		# Calculate direction from current to next position
+		if next_pos:
+			dx = next_pos[0] - x
+			dy = next_pos[1] - y
 
-            if dx == 1:
-                direction = East
-            elif dx == -1:
-                direction = West
-            elif dy == 1:
-                direction = North
-            elif dy == -1:
-                direction = South
-            else:
-                # Handle wrapping or edge cases
-                if dx > 1:  # Wrapped around
-                    direction = East
-                elif dx < -1:
-                    direction = West
-                elif dy > 1:
-                    direction = North
-                elif dy < -1:
-                    direction = South
-                else:
-                    direction = East  # Fallback
+			if dx == 1:
+				direction = East
+			elif dx == -1:
+				direction = West
+			elif dy == 1:
+				direction = North
+			elif dy == -1:
+				direction = South
+			else:
+				# Handle wrapping or edge cases
+				if dx > 1:  # Wrapped around
+					direction = East
+				elif dx < -1:
+					direction = West
+				elif dy > 1:
+					direction = North
+				elif dy < -1:
+					direction = South
+				else:
+					direction = East  # Fallback
 
-            path_map[current_pos] = (direction, index)
-            current_pos = next_pos
-            index += 1
-        else:
-            break
+			path_map[current_pos] = (direction, index)
+			current_pos = next_pos
+			index += 1
+		else:
+			break
 
-    return path_map
+	return path_map, path_array
 
 
-path_map = generate_dino_path_mapping(get_world_size())
+path_map, path_array = generate_dino_path_mapping(get_world_size())
 max_value = get_world_size() ** 2
 
 
 def do_dino_alt():
-    global path_map
-    clear()
-    change_hat(Hats.Dinosaur_Hat)
+	global path_map
+	clear()
+	change_hat(Hats.Dinosaur_Hat)
 
-    size = get_world_size()
-    head = create_body()
-    tail = head
-    length = 1
-    body_parts = set([head["pos"]])
-    apple = measure()
-    _, apple_value = path_map[apple]
+	size = get_world_size()
+	head = create_body()
+	tail = head
+	length = 1
+	body_parts = set([head["pos"]])
+	apple = measure()
+	_, apple_value = path_map[apple]
 
-    while True:
-        x, y = get_pos_x(), get_pos_y()
-        direction, value = path_map[(x, y)]
-        if apple_value < value:
-            dist = apple_value - value + max_value
-        else:
-            dist = apple_value - value  
-        skip = None
-        for neighbor in move.get_neighbors((x, y)):
-            if neighbor in path_map and neighbor not in body_parts:
-                nd, nv = path_map[neighbor]
-                if apple_value < nv:
-                    ndist = apple_value - nv + max_value
-                else:
-                    ndist = apple_value - nv
-                
-                if ndist < dist:
-                    dist = ndist
-                    direction = nd
-                    value = nv
-                    skip = neighbor
-        skipped_pos = []
-        if skip:
-            direction, _ = path_map[(x, y)]
-            current = move.get_pos_from_direction(direction, (x, y))
-            while current != skip:
-                skipped_pos.append(current)
-                direction, _ = path_map[current]
-                current = move.get_pos_from_direction(direction, current)
-            move.goto(skip)
-        else: 
-            if not move.move_direction(direction):
-                break
-        x, y = get_pos_x(), get_pos_y()
-        # Add new head
-        new_head = create_body((x, y), head, None, skipped_pos)
-        head["next"] = new_head
-        head = new_head
-        body_parts.add((x, y))
-        for pos in skipped_pos:
-            body_parts.add(pos)
+	while True:
+		x, y = get_pos_x(), get_pos_y()
+		direction, index = path_map[(x, y)]
+		if apple_value < index:
+			dist = apple_value - index + max_value
+		else:
+			dist = apple_value - index  
+		skip = None
+		if length < (size ** 2) // 2:
+			for neighbor in move.get_neighbors((x, y)):
+				if neighbor in path_map and neighbor not in body_parts:
+					_, ni = path_map[neighbor]
+					if apple_value < ni:
+						ndist = apple_value - ni + max_value
+					else:
+						ndist = apple_value - ni
+					
+					if ndist < dist:
+						dist = ndist
+						skip = (neighbor, ni)
+		skipped_pos = []
+		if skip:
+			pos, ni = skip
+			if ni > index:
+				# Skip forward: get positions between current+1 and skip
+				skipped_pos = path_array[index + 1:ni]
+			else:
+				skipped_pos = path_array[index:] + path_array[:ni]
+			move.goto(pos)
+		else: 
+			if not move.move_direction(direction):
+				break
+		x, y = get_pos_x(), get_pos_y()
+		# Add new head
+		new_head = create_body((x, y), head, None, skipped_pos)
+		head["next"] = new_head
+		head = new_head
+		body_parts.add((x, y))
+		for pos in skipped_pos:
+			body_parts.add(pos)
+		
+		if get_entity_type() == Entities.Apple:
+			length += 1
+			apple = measure()
+			_, apple_value = path_map[apple]
+		else:
+			# Remove tail
+			if tail["pos"] in body_parts:
+				body_parts.remove(tail["pos"])
+			for pos in tail["skipped"]:
+				if pos in body_parts:
+					body_parts.remove(pos)
+			tail = tail["next"]
+			tail["prev"] = None
 
-        if get_entity_type() == Entities.Apple:
-            length += 1
-            apple = measure()
-            _, apple_value = path_map[apple]
-        else:
-            # Remove tail
-            body_parts.remove(tail["pos"])
-            for pos in tail["skipped"]:
-                body_parts.remove(pos)
-            tail = tail["next"]
-            tail["prev"] = None
-
-    change_hat(Hats.Dinosaur_Hat)
-    state.incr_turn(size**2)
+	change_hat(Hats.Dinosaur_Hat)
+	state.incr_turn(size**2)
 
 
 def do_poly():
-    comp = state.data["companion"]
-    x, y = get_pos_x(), get_pos_y()
-    p = None
-    if (x, y) in comp:
-        p = comp[(x, y)]
+	comp = state.data["companion"]
+	x, y = get_pos_x(), get_pos_y()
+	p = None
+	if (x, y) in comp:
+		p = comp[(x, y)]
 
-    if p == None:
-        r = random() * 3 // 1
-        p = [Entities.Grass, Entities.Carrot, Entities.Tree][r]
+	if p == None:
+		r = random() * 3 // 1
+		p = [Entities.Grass, Entities.Carrot, Entities.Tree][r]
 
-    if can_harvest():
-        harvest()
+	if can_harvest():
+		harvest()
 
-    if p == Entities.Bush:
-        water()
-        plant(Entities.Bush)
-    elif p == Entities.Grass:
-        if get_ground_type() == Grounds.Soil:
-            till()
-    elif p == Entities.Carrot:
-        water()
-        if get_ground_type() != Grounds.Soil:
-            till()
-        plant(Entities.Carrot)
-    elif p == Entities.Tree:
-        water()
-        plant(Entities.Tree)
+	if p == Entities.Bush:
+		water()
+		plant(Entities.Bush)
+	elif p == Entities.Grass:
+		if get_ground_type() == Grounds.Soil:
+			till()
+	elif p == Entities.Carrot:
+		water()
+		if get_ground_type() != Grounds.Soil:
+			till()
+		plant(Entities.Carrot)
+	elif p == Entities.Tree:
+		water()
+		plant(Entities.Tree)
 
-    companion_plant, (cx, cy) = get_companion()
-    if companion_plant:
-        comp[(cx, cy)] = companion_plant
-    move.goto(move.get_next())
-    
+	companion_plant, (cx, cy) = get_companion()
+	if companion_plant:
+		comp[(cx, cy)] = companion_plant
+	move.goto(move.get_next())
+	

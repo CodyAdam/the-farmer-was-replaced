@@ -1,4 +1,4 @@
 import harvest_multi
+import harvest_single
 
-while num_items(Items.Power) < 100000:
-	harvest_multi.do_power()
+harvest_single.do_dino_alt()
